@@ -18,7 +18,7 @@ builder.Services.AddReverseProxy()
 // Enregistrement des clients HTTP pour cibler les deux microservices
 builder.Services.AddHttpClient("AuthApi", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5097/");
+    client.BaseAddress = new Uri("http://authentification_api:5157/");
 });
 
 builder.Services.AddHttpClient("GestionAPI", client =>

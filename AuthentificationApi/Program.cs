@@ -25,7 +25,7 @@ builder.Services.AddSwaggerGen();
 // HttpClientFactory pour appeler GestionOrdinateurs.API
 builder.Services.AddHttpClient("GestionOrdinateursAPI", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5130/");
+    client.BaseAddress = new Uri("http://gestionordinateurs_api:5130/");
 });
 
 var app = builder.Build();

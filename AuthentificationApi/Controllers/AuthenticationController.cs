@@ -22,15 +22,39 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] string login)
+    public async Task<IActionResult> Login([FromBody] JsonElement body)
     {
+        string? login = null;
+
+        // Supporte aussi bien une chaîne brute "user1" qu'un objet { "login": "user1" }
+        if (body.ValueKind == JsonValueKind.String)
+        {
+            login = body.GetString();
+        }
+        else if (body.ValueKind == JsonValueKind.Object)
+        {
+            if (body.TryGetProperty("login", out var prop) || body.TryGetProperty("Login", out prop))
+            {
+                login = prop.GetString();
+            }
+        }
+
         if (string.IsNullOrWhiteSpace(login))
         {
             return BadRequest("Le login est obligatoire.");
         }
 
         var client = _httpClientFactory.CreateClient("GestionOrdinateursAPI");
-        var response = await client.GetAsync($"api/Users/login/{login}");
+
+        HttpResponseMessage response;
+        try
+        {
+            response = await client.GetAsync($"api/Users/login/{login}");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Erreur de communication avec GestionOrdinateurs.API : {ex.Message}");
+        }
 
         if (!response.IsSuccessStatusCode)
         {
@@ -48,20 +72,17 @@ public class AuthenticationController : ControllerBase
             return Unauthorized("Impossible de récupérer les données utilisateur.");
         }
 
-        // 2. Création des Claims (Revendications)
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Login),
+            new Claim(ClaimTypes.Name, user.Login ?? string.Empty),
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };
 
-        // 3. Clé secrète de signature (à adapter ou mettre dans appsettings.json)
         var secretKey = _configuration["Jwt:Key"] ?? "MaCleeSuperSecreteAChangerAbsolumentPourLeTP5_2026!";
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        // 4. Génération du token JWT valide 15 minutes
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"] ?? "AuthentificationApi",
             audience: _configuration["Jwt:Audience"] ?? "GestionOrdinateurs",
