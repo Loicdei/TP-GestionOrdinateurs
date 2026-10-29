@@ -9,7 +9,8 @@ builder.Services.AddCors(options =>
                 "http://localhost:5272",   // Blazor en HTTP
                 "https://localhost:5272",  // Blazor en HTTPS
                 "http://localhost:5001",
-                "https://localhost:5001"
+                "https://localhost:5001",
+                "http://localhost:5000"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
