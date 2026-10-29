@@ -1,0 +1,63 @@
+@page "/ordinateur"
+@using GestionOrdinateurs.Shared
+@inject HttpClient Http
+
+<h3>Liste des Ordinateurs</h3>
+
+@if (ordinateurs == null)
+{
+    <p><em>Chargement...</em></p>
+}
+else if (!ordinateurs.Any())
+{
+    <p>Aucun ordinateur trouvé.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Marque</th>
+                <th>Prix</th>
+                <th>Vendu</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ordinateurs)
+            {
+                <tr>
+                    <td>@item.Nom</td>
+                    <td>@item.Marque</td>
+                    <td>@item.Prix €</td>
+                    <td>
+                        @if (item.Vendu)
+                        {
+                            <span class="badge bg-success">Oui</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Non</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Ordinateur>? ordinateurs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            ordinateurs = await Http.GetFromJsonAsync<List<Ordinateur>>("api/ordinateur");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur : {ex.Message}");
+        }
+    }
+}

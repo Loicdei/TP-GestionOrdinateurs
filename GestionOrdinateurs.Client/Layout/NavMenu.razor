@@ -1,0 +1,63 @@
+﻿@inject NavigationManager Navigation
+@inject Blazored.SessionStorage.ISessionStorageService SessionStorage
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Gestion Ordinateurs</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill" aria-hidden="true"></span> Accueil
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="login">
+                <span class="bi bi-person-fill" aria-hidden="true"></span> Connexion
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3 mt-3">
+            <button class="btn btn-outline-danger w-100 text-start" @onclick="Logout">
+                <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Déconnexion
+            </button>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="ordinateur">
+                <span class="bi bi-laptop-nav-menu" aria-hidden="true"></span> Ordinateurs
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="reparation">
+                <span class="bi bi-tools-nav-menu" aria-hidden="true"></span> Réparations
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task Logout()
+    {
+        // 1. Supprime le token JWT du sessionStorage
+        await SessionStorage.RemoveItemAsync("authToken");
+
+        // 2. Redirige vers la page de login
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

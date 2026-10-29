@@ -1,0 +1,56 @@
+@page "/reparation"
+@using GestionOrdinateurs.Shared
+@inject HttpClient Http
+
+<h3>Historique des Réparations</h3>
+
+@if (reparations == null)
+{
+    <p><em>Chargement...</em></p>
+}
+else if (!reparations.Any())
+{
+    <p>Aucune réparation enregistrée.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Statut</th>
+                <th>Technicien</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rep in reparations)
+            {
+                <tr>
+                    <td>@rep.Id</td>
+                    <td>@rep.TypeReparation</td>
+                    <td>@rep.Statut</td>
+                    <td>@rep.Technicien</td>
+                    <td>@rep.DateDebut.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Reparation>? reparations;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            reparations = await Http.GetFromJsonAsync<List<Reparation>>("api/reparation");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur : {ex.Message}");
+        }
+    }
+}
