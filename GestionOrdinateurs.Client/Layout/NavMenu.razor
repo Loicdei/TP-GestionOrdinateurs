@@ -1,5 +1,6 @@
-﻿@inject NavigationManager Navigation
-@inject Blazored.SessionStorage.ISessionStorageService SessionStorage
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject NavigationManager Navigation
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -18,28 +19,32 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="login">
-                <span class="bi bi-person-fill" aria-hidden="true"></span> Connexion
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3 mt-3">
-            <button class="btn btn-outline-danger w-100 text-start" @onclick="Logout">
-                <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Déconnexion
-            </button>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="ordinateur">
-                <span class="bi bi-laptop-nav-menu" aria-hidden="true"></span> Ordinateurs
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="reparation">
-                <span class="bi bi-tools-nav-menu" aria-hidden="true"></span> Réparations
-            </NavLink>
-        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="ordinateur">
+                        <span class="bi bi-laptop-nav-menu" aria-hidden="true"></span> Ordinateurs
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="reparation">
+                        <span class="bi bi-tools-nav-menu" aria-hidden="true"></span> Réparations
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3 mt-3">
+                    <button class="btn btn-outline-danger w-100 text-start" @onclick="LogoutKeycloak">
+                        <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Déconnexion
+                    </button>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="login">
+                        <span class="bi bi-person-fill" aria-hidden="true"></span> Connexion
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
     </nav>
 </div>
 
@@ -52,12 +57,9 @@
         collapseNavMenu = !collapseNavMenu;
     }
 
-    private async Task Logout()
+    private void LogoutKeycloak()
     {
-        // 1. Supprime le token JWT du sessionStorage
-        await SessionStorage.RemoveItemAsync("authToken");
-
-        // 2. Redirige vers la page de login
-        Navigation.NavigateTo("/login", forceLoad: true);
+        // Déconnexion OIDC Keycloak standard
+        Navigation.NavigateToLogout("authentication/logout");
     }
 }

@@ -23,10 +23,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configuration JWT
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "MaCleeSuperSecreteAChangerAbsolumentPourLeTP5_2026!";
-var key = Encoding.ASCII.GetBytes(jwtKey);
-
+// Configuration JWT Keycloak
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -34,14 +31,13 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    // Adresse interne Docker de Keycloak
+    options.Authority = builder.Configuration["Keycloak:Authority"] ?? "http://keycloak:8080/realms/parcinfo-realm";
     options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false
+        ValidateAudience = false,
+        ValidateIssuer = false
     };
 });
 
